@@ -62,36 +62,7 @@ sudo apt install nodejs -y
 ```
 
 
-**Note: ** By default, Jenkins will not be accessible to the external world due to the inbound traffic restriction by AWS. Open port 8080 in the inbound traffic rules as show below.
-
-- EC2 > Instances > Click on <Instance-ID>
-- In the bottom tabs -> Click on Security
-- Security groups -> Edit inbound rules
-- add 8080 Port for jenkins 
-
-
-
-### Login to Jenkins using the below URL:
-
-`http://<ec2-instance-public-ip-address>:8080`  [You can get the ec2-instance-public-ip-address from your AWS EC2 console page]
-
-   - Edit the inbound traffic rule to only allow custom TCP port `8080`
-
-After you login to Jenkins, 
-      - Run the command to copy the Jenkins Admin Password - `sudo cat /var/lib/jenkins/secrets/initialAdminPassword`
-      - Enter the Administrator password
-      
-<img width="1291" src="https://user-images.githubusercontent.com/43399466/215959008-3ebca431-1f14-4d81-9f12-6bb232bfbee3.png">
-
-Click on Install suggested plugins
-
-Wait for the Jenkins to Install suggested plugins
-
-Jenkins Installation is Successful. You can now starting using the Jenkins 
-
-<img width="990" src="https://user-images.githubusercontent.com/43399466/215961440-3f13f82b-61a2-4117-88bc-0da265a67fa7.png">
-
-Install the Required plugins in Jenkins
+### Install the Required plugins in Jenkins
 ````
 stage view
 ````
@@ -121,25 +92,6 @@ docker
 Wait for the Jenkins to be restarted.
 
 
-## Install Docker:
-
-
-- Set up Docker on the EC2 instance:
-
-```
-sudo apt update -y
-sudo apt install docker.io -y
-sudo systemctl enable docker
-sudo systemctl start docker
-sudo usermod -aG docker jenkins
-sudo usermod -aG docker ubuntu
-newgrp docker
-sudo chmod 777 /var/run/docker.sock
-
-```
-
-
-
 
 Once you are done with the above steps, it is better to restart Jenkins.
 
@@ -156,13 +108,23 @@ http://<ec2-instance-public-ip>:8080/restart
        ```
        docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
        ```
-
+**Trivy**
+````
+sudo apt-get install wget gnupg
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy
+````
        To access: 
         
-        publicIP:9000 (by default username & password is admin)
-        
-        
-        
+## publicIP:9000 (by default username & password is admin)
+
+---
+# EKS Cluster Setup & AWS cli install
+
+#### follow this repository
+https://github.com/sachin-rathod-tech/Kubernetes/blob/main/eks-cluster-installation.md
         
 ### Integrate SonarQube and Configure:
 
@@ -228,13 +190,13 @@ pipeline {
 
     environment {
         SCANNER_HOME          = tool 'sonar-scanner'
-        DOCKER_IMAGE          = 'myntraa'
-        DOCKER_REGISTRY       = 'username'
+        DOCKER_IMAGE          = 'myntra'
+        DOCKER_REGISTRY       = 'rathodsr'
         DOCKER_CREDENTIALS_ID = 'docker-cred'
         MANIFEST_FILE         = 'k8s/deployment.yml'
         GIT_REPO_NAME         = 'Project-Myntra-Clone'
-        GIT_USER_NAME         = 'username'
-        GIT_EMAIL             = 'username@gmail.com'
+        GIT_USER_NAME         = 'sachin-rathod-tech'
+        GIT_EMAIL             = 'sachin@gmail.com'
     }
 
     stages {
@@ -311,6 +273,7 @@ pipeline {
         }
     }
 }
+
 
 ```
 
